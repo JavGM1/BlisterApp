@@ -90,10 +90,10 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.1.0")
 
     // Jetpack Security para almacenamiento encriptado de credenciales/flags sensibles
-    implementation("androidx.security:security-crypto:1.1.0-alpha04")
+    implementation("androidx.security:security-crypto:1.1.0")
 
     // Biometría (huella / Face ID)
-    implementation("androidx.biometric:biometric:1.2.0-alpha03")
+    implementation("androidx.biometric:biometric:1.2.0-alpha05")
 
     // WorkManager (para notificaciones programadas y tareas en background)
     implementation("androidx.work:work-runtime-ktx:2.8.1")
@@ -106,6 +106,7 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.11.0")
     implementation("org.jsoup:jsoup:1.16.1")
 
+
     // Carga de imágenes en Compose
     implementation("io.coil-kt:coil-compose:2.4.0")
 
@@ -115,6 +116,8 @@ dependencies {
     // Accompanist utilities (si vas a usar controlador de sistema UI o permisos en Compose)
     implementation("com.google.accompanist:accompanist-systemuicontroller:0.32.0")
     implementation("com.google.accompanist:accompanist-permissions:0.32.0")
+
+    implementation("io.coil-kt:coil-compose:2.4.0")
 
     // Testing / Debug (opcional)
     testImplementation("junit:junit:4.13.2")
