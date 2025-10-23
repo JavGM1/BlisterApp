@@ -7,11 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-/**
- * ViewModel para la pantalla Cotizar.
- * - Exponer list of PharmacyQuote
- * - Permitir refresh
- */
+
 class CotizarViewModel(
     private val repository: CotizarRepository,
     private val urlsToScrape: List<String>

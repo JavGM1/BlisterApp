@@ -2,72 +2,48 @@ package com.example.blisterapp.ui.screens
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
-import com.example.blisterapp.auth.BiometricUtils
 import com.example.blisterapp.auth.SessionManager
 import com.example.blisterapp.ui.navigation.Routes
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
-
+import com.example.blisterapp.ui.navigation.ServiceLocator
+import com.example.blisterapp.repository.LocalAuthRepositoryImpl
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
 fun SplashScreen(navController: NavController, sessionManager: SessionManager) {
-    val context = LocalContext.current
-    var decided by remember { mutableStateOf(false) }
+    val isLoggedIn by sessionManager.isLoggedIn.collectAsStateWithLifecycle(initialValue = false)
 
-    // Pequeña UI de splash (puedes reemplazar con logo/branding)
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        CircularProgressIndicator()
-    }
-
-    LaunchedEffect(Unit) {
-        delay(300)
-
-        sessionManager.isLoggedIn.collectLatest { _ ->
-            if (decided) return@collectLatest
-
-            val token = sessionManager.token
-            val userId = sessionManager.currentUserId.value
-            val hasValidSession = !token.isNullOrBlank() && userId.isNotBlank()
-
-            fun goHome() {
-                if (!decided) {
-                    decided = true
-                    navController.navigate(Routes.HOME) {
-                        popUpTo(Routes.SPLASH) { inclusive = true }
-                    }
-                }
+    LaunchedEffect(isLoggedIn) {
+        if (isLoggedIn) {
+            navController.navigate(Routes.HOME) {
+                popUpTo(Routes.SPLASH) { inclusive = true }
             }
+            return@LaunchedEffect
+        }
 
-            fun goLogin() {
-                if (!decided) {
-                    decided = true
-                    navController.navigate(Routes.LOGIN) {
-                        popUpTo(Routes.SPLASH) { inclusive = true }
-                    }
-                }
-            }
+        val repoImpl = ServiceLocator.localAuthRepository as? LocalAuthRepositoryImpl
 
-            if (!hasValidSession) {
-                goLogin()
-                return@collectLatest
-            }
-
-            // Si hay sesión válida, si la biometría está habilitada la usamos; si no, vamos a Home
-            if (sessionManager.biometricEnabled && BiometricUtils.isBiometricAvailable(context)) {
-                BiometricUtils.authenticate(
-                    context = context,
-                    onSuccess = { goHome() },
-                    onError = { /* si falla la biometric, forzamos login */ goLogin() }
-                )
-            } else {
-                goHome()
+        val hasUsers = withContext(Dispatchers.IO) {
+            try {
+                repoImpl?.hasUsers() ?: false
+            } catch (t: Throwable) {
+                false
             }
         }
+
+        val target = if (hasUsers) Routes.LOGIN else Routes.REGISTER
+        navController.navigate(target) {
+            popUpTo(Routes.SPLASH) { inclusive = true }
+        }
+    }
+
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text("BlisterApp")
     }
 }

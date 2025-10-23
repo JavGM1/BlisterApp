@@ -10,12 +10,7 @@ import com.example.blisterapp.ui.components.BlisterComposable
 import com.example.blisterapp.ui.mi_ciclo.MiCicloViewModel
 import kotlinx.coroutines.launch
 
-/**
- * Pantalla que consume MiCicloViewModel y muestra BlisterComposable.
- *
- * Integra un botón de ejemplo para marcar la pastilla de hoy (llama al ViewModel).
- * Ajusta la navegación a tu NavGraph donde corresponda.
- */
+
 @Composable
 fun MiCicloScreen(
     viewModel: MiCicloViewModel,

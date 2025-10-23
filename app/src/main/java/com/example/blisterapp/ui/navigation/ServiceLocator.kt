@@ -2,6 +2,8 @@ package com.example.blisterapp.ui.navigation
 
 import android.content.Context
 import com.example.blisterapp.auth.SessionManager
+import com.example.blisterapp.repository.LocalAuthDataSource
+import com.example.blisterapp.repository.LocalAuthRepositoryImpl
 import com.example.blisterapp.ui.mi_ciclo.CycleEntity
 import com.example.blisterapp.ui.mi_ciclo.CycleRepository
 import com.example.blisterapp.ui.mi_ciclo.PillTakenRepository
@@ -11,16 +13,18 @@ import com.example.blisterapp.repository.CotizarRepository
 import kotlinx.coroutines.flow.*
 import java.time.LocalDate
 
-/**
- * ServiceLocator actualizado: llamar init(context) antes de usar sessionManager.
- */
 object ServiceLocator {
     var sessionManager: SessionManager? = null
         private set
 
+    var localAuthRepository: LocalAuthDataSource? = null
+        private set
+
     fun init(context: Context) {
         if (sessionManager == null) {
-            sessionManager = SessionManager(context.applicationContext)
+            val appCtx = context.applicationContext
+            sessionManager = SessionManager(appCtx)
+            localAuthRepository = LocalAuthRepositoryImpl(appCtx)
         }
     }
 

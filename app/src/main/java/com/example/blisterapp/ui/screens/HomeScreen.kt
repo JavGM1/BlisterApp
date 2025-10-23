@@ -10,10 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 
-/**
- * HomeScreen compacto: sólo botones para navegar a Mi Ciclo y Cotizar.
- * Evita mostrar Blister aquí — el Blister debe estar en MiCicloScreen.
- */
+
 @Composable
 fun HomeScreen(
     navController: NavController

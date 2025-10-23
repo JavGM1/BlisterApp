@@ -12,10 +12,6 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.Alignment
 import com.example.blisterapp.ui.navigation.Routes
 
-/**
- * LoginScreen simple: en modo desarrollo acepta cualquier credencial y guarda token ficticio.
- * Reemplazar la lógica de login por llamado a backend en producción.
- */
 @Composable
 fun LoginScreen(
     navController: NavController,
@@ -61,15 +57,11 @@ fun LoginScreen(
                 error = "Ingresa usuario y contraseña"
                 return@Button
             }
-            // MOCK: genera token ficticio. En producción, llamar backend y obtener token real.
             val fakeToken = "token_for_${username.trim()}"
-            // Guardamos token y también el userId (aquí usamos el username como userId).
             sessionManager.login(tokenValue = fakeToken, enableBiometric = enableBiometric, userId = username.trim())
 
-            // DEBUG: verificar que los valores quedaron guardados
             Log.d("SESSION_DEBUG", "after login: isLoggedIn=${sessionManager.isLoggedIn.value}, token=${sessionManager.token}, userId=${sessionManager.currentUserId.value}, biometric=${sessionManager.biometricEnabled}")
 
-            // Navegar al Home y limpiar backstack
             navController.navigate(Routes.HOME) {
                 popUpTo(Routes.LOGIN) { inclusive = true }
             }

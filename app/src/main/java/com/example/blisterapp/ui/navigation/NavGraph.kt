@@ -11,6 +11,7 @@ import com.example.blisterapp.ui.screens.SplashScreen
 import com.example.blisterapp.auth.SessionManager
 import com.example.blisterapp.ui.screens.MiCicloScreen
 import com.example.blisterapp.ui.screens.CotizarScreen
+import com.example.blisterapp.ui.screens.FormularioScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.blisterapp.ui.navigation.ServiceLocator
@@ -18,13 +19,14 @@ import com.example.blisterapp.ui.mi_ciclo.MiCicloViewModel
 import com.example.blisterapp.ui.navigation.MiCicloViewModelFactory
 import com.example.blisterapp.ui.cotizar.CotizarViewModel
 import com.example.blisterapp.ui.cotizar.CotizarViewModelFactory
-
+import com.example.blisterapp.ui.screens.RegisterScreen
+import com.example.blisterapp.repository.LocalAuthDataSource
 
 @Composable
 fun NavGraph(navController: NavHostController = rememberNavController()) {
     val sessionManager = ServiceLocator.sessionManager ?: return
 
-    NavHost(navController = navController, startDestination = Routes.SPLASH) {
+    NavHost(navController = navController, startDestination = Routes.REGISTER) {
         composable(Routes.SPLASH) {
             SplashScreen(navController = navController, sessionManager = sessionManager)
         }
@@ -33,12 +35,16 @@ fun NavGraph(navController: NavHostController = rememberNavController()) {
             LoginScreen(navController = navController, sessionManager = sessionManager)
         }
 
+        composable(Routes.REGISTER) {
+            val repo: LocalAuthDataSource? = ServiceLocator.localAuthRepository
+            RegisterScreen(navController = navController, sessionManager = sessionManager, localAuthRepository = repo)
+        }
+
         composable(Routes.HOME) {
             HomeScreen(navController = navController)
         }
 
         composable(Routes.MI_CICLO) {
-            // Creamos el ViewModelFactory pasando sessionManager para que el ViewModel observe currentUserId
             val factory = MiCicloViewModelFactory(
                 cycleRepository = ServiceLocator.cycleRepository,
                 pillTakenRepository = ServiceLocator.pillTakenRepository,
@@ -46,6 +52,10 @@ fun NavGraph(navController: NavHostController = rememberNavController()) {
             )
             val miCicloViewModel: MiCicloViewModel = viewModel(factory = factory as ViewModelProvider.Factory)
             MiCicloScreen(viewModel = miCicloViewModel)
+        }
+
+        composable(Routes.FORMULARIO) {
+            FormularioScreen(navController)
         }
 
         composable(Routes.COTIZAR) {
