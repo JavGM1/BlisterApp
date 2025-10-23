@@ -4,90 +4,62 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.Alignment
-import com.example.blisterapp.viewmodel.UsuarioViewModel
+import androidx.navigation.NavController
+import com.example.blisterapp.ui.mi_ciclo.CycleEntity
+import com.example.blisterapp.ui.navigation.Routes
+import com.example.blisterapp.ui.navigation.ServiceLocator
+import kotlinx.coroutines.launch
+import java.time.LocalDate
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
-fun FormularioScreen(
-    onRegistered: () -> Unit,
-    viewModel: UsuarioViewModel
-) {
-    val estado by viewModel.estado.collectAsState()
-    Column(
-        Modifier
-            .fillMaxSize()
-            .padding(16.dp),
+fun FormularioScreen(navController: NavController) {
+    val cycleRepository = ServiceLocator.cycleRepository
+    val sessionManager = ServiceLocator.sessionManager ?: return
+
+    val userId by sessionManager.currentUserId.collectAsStateWithLifecycle()
+
+    val scope = rememberCoroutineScope()
+
+    var error by remember { mutableStateOf<String?>(null) }
+    var loading by remember { mutableStateOf(false) }
+
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        OutlinedTextField(
-            value = estado.nombre,
-            onValueChange = viewModel::onNombreChange,
-            label = { Text("Nombre") },
-            isError = estado.errores.nombre != null,
-            supportingText = {
-                estado.errores.nombre?.let {
-                    Text(it, color = MaterialTheme.colorScheme.error)
+        Text("Completa tu información", style = MaterialTheme.typography.headlineSmall)
+
+        Text("Se guardará la fecha de inicio del ciclo como hoy. Puedes cambiar esto más tarde.")
+
+        error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+
+        Button(onClick = {
+            error = null
+            if (userId.isBlank()) {
+                error = "Usuario no identificado"
+                return@Button
+            }
+            loading = true
+            scope.launch {
+                try {
+                    val startIsoDate = LocalDate.now()
+                    val cycle = CycleEntity(userId = userId, startDate = startIsoDate)
+                    cycleRepository.setCycleForUser(userId, cycle)
+                    // Navegar a Home
+                    navController.navigate(Routes.HOME) {
+                        popUpTo(Routes.FORMULARIO) { inclusive = true }
+                    }
+                } catch (t: Throwable) {
+                    error = t.localizedMessage ?: "Error al guardar"
+                } finally {
+                    loading = false
                 }
-            },
-            modifier = Modifier.fillMaxWidth()
-        )
-        OutlinedTextField(
-            value = estado.correo,
-            onValueChange = viewModel::onCorreoChange,
-            label = { Text("Correo") },
-            isError = estado.errores.correo != null,
-            supportingText = {
-                estado.errores.correo?.let {
-                    Text(it, color = MaterialTheme.colorScheme.error)
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
-        )
-        OutlinedTextField(
-            value = estado.clave,
-            onValueChange = viewModel::onClaveChange,
-            label = { Text("Clave") },
-            visualTransformation = PasswordVisualTransformation(),
-            isError = estado.errores.clave != null,
-            supportingText = {
-                estado.errores.clave?.let {
-                    Text(it, color = MaterialTheme.colorScheme.error)
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
-        )
-        OutlinedTextField(
-            value = estado.direccion,
-            onValueChange = viewModel::onDireccionChange,
-            label = { Text("Dirección") },
-            isError = estado.errores.direccion != null,
-            supportingText = {
-                estado.errores.direccion?.let {
-                    Text(it, color = MaterialTheme.colorScheme.error)
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
-        )
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(
-                checked = estado.aceptaTerminos,
-                onCheckedChange = viewModel::onAceptarTerminosChange
-            )
-            Spacer(Modifier.width(8.dp))
-            Text("Acepto los términos y condiciones")
-        }
-        Button(
-            onClick = {
-                viewModel.register { success, _ ->
-                    if (success) onRegistered()
-                    // else show UI error (todo)
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Registrar")
+            }
+        }, enabled = !loading, modifier = Modifier.fillMaxWidth()) {
+            Text(if (loading) "Guardando..." else "Guardar y continuar")
         }
     }
 }

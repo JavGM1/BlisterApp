@@ -1,22 +1,25 @@
 package com.example.blisterapp
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import com.example.blisterapp.ui.navigation.ServiceLocator
 import com.example.blisterapp.ui.navigation.NavGraph
-import com.example.blisterapp.ui.theme.BlisterAppTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Inicializa SessionManager seguro con applicationContext antes de setContent
+        ServiceLocator.init(applicationContext)
+
+        // DEBUG: imprime el estado inicial de la sesión para verificar persistencia
+        val sm = ServiceLocator.sessionManager
+        Log.d("SESSION_DEBUG", "after init: isLoggedIn=${sm?.isLoggedIn?.value}, token=${sm?.token}, userId=${sm?.currentUserId?.value}, biometric=${sm?.biometricEnabled}")
+
         setContent {
-            BlisterAppTheme {
-                Surface(color = MaterialTheme.colorScheme.background) {
-                    NavGraph()
-                }
-            }
+            // Aplica tu tema aquí si tienes uno
+            NavGraph()
         }
     }
 }
